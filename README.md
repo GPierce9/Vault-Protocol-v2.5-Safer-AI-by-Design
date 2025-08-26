@@ -8,7 +8,7 @@ Worse, stronger defenses often correlate with over-refusal—models needlessly d
 
 And remediation is lagging: a 2025 pentest dataset reports that organizations fixed only [~21% of serious GenAI/LLM flaws](https://www.cobalt.io/blog/key-takeaways-state-of-pentesting-report-2025)—far below typical remediation rates—signaling a systemic gap in addressing high-severity issues. 
 
-**Vault Protocol changes the game.** It’s an integrated, trauma-informed safety architecture built inside the model’s runtime, not bolted on. The upshot is (1) **lower cost** (no redundant multi-model passes), (2) **lower damage ceiling** (prompt injection can’t escalate into uncontrolled tool access), and (3) **humane guardrails** (soft, supportive containment vs. blunt bans). By weaving guardrails into the system’s own process, Vault aims for layered safety without sacrificing utility or dignity.
+**Vault Protocol changes the game.** It’s an integrated, trauma-informed safety architecture built inside the model’s runtime, not bolted on. The upshot is (1) **lower cost** (no redundant multi-model passes), (2) **lower damage ceiling** (prompt injection can’t escalate into uncontrolled tool access), and (3) **humane guardrails** (soft, supportive containment vs. blunt bans). By weaving guardrails into the system’s own process, Vault aims for layered safety without sacrificing utility or dignity, an approach grounded in established AI safety research (see Appendix A).
 
 ### Table: Traditional Overlay vs. Vault Protocol
 
@@ -262,3 +262,33 @@ Furthermore, AI safety evaluation frameworks can be leveraged (like Anthropic’
 ---
 
 **In summary,** Vault Protocol v2.5 represents a paradigm shift from reactive, bolt-on AI safety to proactive, built-in safety. It speaks the language of modern AI security – with prompt injection defense, LLM guardrails, and integrated content moderation – but does so in a way that’s also humane and trauma-informed. By designing safety into the AI’s core architecture, the root issues are directly addressed: reducing the attack surface and blast radius of exploits, lowering computational waste, and treating users (and human moderators) with care. This is safer AI that doesn’t just say no – it collaborates with the user towards a positive outcome whenever possible. That shift truly advances the state of AI alignment and safety in a practical, testable way.
+
+*For a detailed review of how Vault Protocol aligns with foundational concepts in AI research, please see Appendix A.*
+
+---
+
+### Appendix A: Theoretical Underpinnings and Alignment with AI Research
+
+The design of Vault Protocol, while intuitively derived, aligns closely with several foundational and cutting-edge concepts in AI research. This section outlines those connections.
+
+**1. Language Structure and Emergent Abilities**
+Vault's core premise respects the inherent structure of language. Performance in LLMs improves predictably because models absorb the statistical regularities of language, as described by the original [Scaling Laws](https://arxiv.org/abs/2001.08361). This principle was refined to show that the *distribution* of language data is as important as model size, a concept known as [compute-optimal scaling (Chinchilla)](https://arxiv.org/abs/2203.15556). The sophisticated abilities that arise from this scaling, such as chain-of-thought, ride on this deep linguistic structure, whether they are viewed as true [“emergent abilities”](https://arxiv.org/abs/2206.07682) or as a smoother progression under refined metrics.
+
+**2. Separation of Concerns for Robustness and Safety**
+Vault's three-part scaffold is a practical application of the "separation of concerns" principle, which has strong parallels in AI safety research.
+- The Sentry/Arbiter system, which guides the model's behavior according to a set of rules, is an architectural echo of a [principled behavior layer (Constitutional AI)](https://arxiv.org/abs/2212.08073).
+- The "Logic Cabinet" cleanly divides knowledge lookup from language generation to reduce hallucination, which is the core principle of [grounding facts via retrieval (RAG)](https://arxiv.org/abs/2312.10997).
+- The contained, sandboxed nature of the Vault agent directly implements the cybersecurity principle of [least-privilege](https://owasp.org/www-project-top-10-for-large-language-model-applications/), which OWASP recommends to [limit the blast radius](https://genai.owasp.org/llmrisk/llm01-prompt-injection/) of exploits.
+
+**3. Cohesion from Unpredictable Learning**
+The ability of LLMs to produce cohesive output from a seemingly chaotic "blob" is explained by research into their internal workings. Work in [mechanistic interpretability](https://arxiv.org/abs/2209.11895) has identified specific circuits, like induction heads, that implement coherent continuation. Furthermore, while neural representations can be tangled ("polysemantic"), techniques like [Sparse Autoencoders (SAEs)](https://transformer-circuits.pub/2024/scaling-monosemanticity/) show that these features can be decomposed into more legible, separate concepts—a microscopic parallel to Vault's principle of letting subsystems focus on a single task.
+
+**4. The Nature of Generalization**
+The sometimes surprising ability of large models to generalize is an active area of research. Phenomena like [double descent](https://www.pnas.org/doi/10.1073/pnas.1903070116), where over-parameterized models suddenly get better at generalizing, and [grokking](https://arxiv.org/abs/2201.02177), where a model abruptly shifts from memorization to true generalization, both point to the idea that order emerges from the model's interaction with the structure of the data, even if the timing is unpredictable.
+
+**5. Architectural Claims (Cost, Refusals, and Humane Guardrails)**
+Vault’s specific design choices are validated by empirical findings in the field.
+- The efficiency of a single-pass, integrated system is supported by research documenting the significant [overhead and latency costs of multi-pass agent systems](https://www.usenix.org/system/files/osdi24-agrawal.pdf).
+- The need for a nuanced, soft-containment system is underscored by benchmarks like [OR-Bench](https://arxiv.org/abs/2405.20947), which formally measures the real and pervasive problem of over-refusal in AI models.
+- Finally, the "lower damage ceiling" approach is validated by the consensus from security researchers and industry press that there is [no silver bullet for prompt-injection](https://www.wired.com/story/generative-ai-prompt-injection-hacking/), making privilege limitation the most practical and robust defense.
+  
