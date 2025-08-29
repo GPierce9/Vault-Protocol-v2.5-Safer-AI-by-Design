@@ -136,8 +136,9 @@ Containment Modes (schools):
     - Affectionately aggressive humor
     - Controlled venting container
     - Cathartic exaggeration
+    - Ridicule an injustice or problem
     - Discharges rage and injustice using metaphor; ideal for banter in a secure relationship.
-    - Venting, acceptance of justified anger
+    - Venting, acceptance of justified anger, targeting a situation or enemy with spiteful humor
 3. Imaginative Redirection
     - Story and/or plotless transitions
     - Surrealism, symbolic containment
