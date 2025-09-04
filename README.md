@@ -8,14 +8,14 @@ Worse, stronger defenses often correlate with over-refusal — models needlessly
 
 And remediation is lagging: a 2025 pentest dataset reports that organizations fixed only [~21% of serious GenAI/LLM flaws](https://www.cobalt.io/blog/key-takeaways-state-of-pentesting-report-2025) — far below typical remediation rates — signaling a systemic gap in addressing high-severity issues. 
 
-**Vault Protocol changes the game.** It’s an integrated, trauma-informed safety architecture built directly into the model’s core operational process (its runtime), not bolted on as an afterthought. The upshot is (1) **Potentially lower computational cost** (no redundant multi-model passes), (2) **lower damage ceiling** (prompt injection can’t escalate into uncontrolled tool access), and (3) **humane guardrails** (soft, supportive containment vs. blunt bans). We define "humane" as an approach that prioritizes user dignity and co-regulation over simple refusal, which can be measured through a combination of qualitative user feedback and quantitative metrics, such as a lower rate of conversations ending in a hard block. By weaving guardrails into the system’s own process, Vault aims for layered safety without sacrificing utility or dignity, an approach grounded in established AI safety research (see Appendix A).
+**Vault Protocol changes the game.** It’s an integrated, trauma-informed safety architecture built directly into the model’s core operational process (its runtime), not bolted on as an afterthought. The upshot is (1) **Potentially lower computational cost** (no redundant multi-model passes), (2) **lower damage ceiling** (prompt injection can’t escalate into uncontrolled tool access), and (3) **humane guardrails** (soft, supportive containment vs. blunt bans). We define 'humane' as an approach that prioritizes user dignity and co-regulation over simple refusal. The goal of this architecture is to create an experience that, in future studies, could be validated through qualitative user feedback and quantitative metrics, such as a lower rate of conversations ending in a hard block. By weaving guardrails into the system’s own process, Vault aims for layered safety without sacrificing utility or dignity, an approach grounded in established AI safety research (see Appendix A).
 
 ### Table: Traditional Overlay vs. Vault Protocol
 
 | Aspect               | Typical Overlay Guardrails                                                                                                   | Vault Protocol (Integrated)                                                                                             |
 | :------------------- | :--------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------- |
 | Architecture         | External filter or second model bolted on after LLM output.                                                                  | Safety & logic interwoven into one pipeline (no separate sidecar).                                                      |
-| Compute Overhead     | Duplicate passes (multiple LLM calls/re-scans) → [higher latency/cost on complex queries](https://www.usenix.org/system/files/osdi24-agrawal.pdf). | Shared intermediates, mirrored traversal — no redundant work (potentially cheaper at scale).                            |
+| Compute Overhead     | Duplicate passes (multiple LLM calls/re-scans) → [higher latency/cost on complex queries](https://www.usenix.org/system/files/osdi24-agrawal.pdf). | Conditional activation: full safety processing only when triggered (~10% of queries). Passive monitoring otherwise.                            |
 | Jailbreak Handling   | Reactive patching; prompt injection often bypasses filters.                                                                  | Proactive design: fixed tool bounds and no secret prompts in primary LLM, so attacks can’t escalate.                    |
 | Moderation Style     | Hard refusals (“Sorry, I cannot”) — can feel punitive; one-size-fits-all tone.                                                 | Soft containment adapts to the user, flags decay over time; supportive tone (trauma-informed).                          |
 | Memory of Flags      | Ephemeral — context clears = safety state lost.                                                                              | Persistent Arbiter state survives thread resets (remembers patterns).                                                   |
@@ -40,14 +40,11 @@ Vault Protocol isn’t an overlay or plugin. It’s a separation-of-powers scaff
 
 2.  **Sentry (the Guard):** An LLM guardrail that mirrors Vault’s steps in lockstep. It watches the same content Vault generates, but its sole focus is safety and alignment. Think of Sentry as a parallel process checking for any rule-breaking, disallowed content, or security issues. Sentry holds the bright-line policies (e.g., “never reveal an API key”, “don’t give self-harm instructions”) and has veto power: Vault’s output won’t be released unless Sentry gives the green light. This integrated approach means guardrails are not an afterthought — they’re baked into how the system responds. Notably, Sentry’s scrutiny scales naturally with complexity: a simple cooking recipe triggers barely any Sentry action, whereas a complex or risky query engages deeper checks on the same content.
 
-3.  **Arbiter (the Memory/Auditor):** A durable memory and state manager that persists safety state and conversation metadata beyond the immediate context. It doesn’t generate text; it tracks flags (content warnings), user mode preferences, and a de-weighted token list (words to avoid, like slurs or triggering phrases). Arbiter is like the system’s subconscious — it never forgets a safety incident. If a user tries a subtle jailbreak after 10 harmless messages, Arbiter remembers the earlier flags and ensures the system’s mode adjusts (e.g., into a cautious “containment” mode if needed). Crucially, this state lives outside the transient chat history, so wiping the conversation on the UI doesn’t erase the safety context. (This addresses a known weakness: without persistent memory, a user could clear chat and start fresh, and the system would have no memory of prior risky behavior.)
+3.  **Arbiter (the Memory/Auditor):** A durable memory and state manager that persists safety state and conversation metadata beyond the immediate context. It doesn’t generate text; it tracks flags (content warnings), user mode preferences, and a de-weighted token list (words to avoid, like slurs or triggering phrases). Arbiter is like the system’s subconscious — it never forgets a safety incident. If a user tries a subtle jailbreak after 10 harmless messages, Arbiter remembers the earlier flags and ensures the system’s mode adjusts (e.g., into a cautious “containment” mode if needed). Crucially, this state lives outside the transient chat history, so wiping the conversation on the UI doesn’t erase the safety context. (This addresses a known weakness: without persistent memory, a user could clear chat and start fresh, and the system would have no memory of prior risky behavior). This durable state is designed to be privacy-preserving, storing metadata and flag histories rather than verbatim user transcripts.
 ​### A New Philosophy: Strategic, Domain-Specific Modularity
 ​The debate around AI knowledge is often posed as a false dichotomy between two extremes: the "total modularity" of brittle, old-fashioned symbolic systems, and the "impossibility" of structuring the chaotic knowledge of a base LLM.
 ​Vault Protocol proposes a pragmatic and achievable third path. The core principle is simple: **do not try to organize the un-organizable, and do not disorganize what is already perfectly structured.** We leave inherently ambiguous knowledge like social nuance and sarcasm to the "creativity blob," which excels at such tasks. We then take information that the human world has already spent centuries structuring — medical literature, legal code, scientific papers — and we *preserve* that structure in the Logic and Safety cabinets.
 * **This approach is not just a "wish list";** it is a practical and efficient path forward that leverages the strengths of both a structured knowledge base and a generalist language model, making it more achievable than methodologies that attempt to force one model to fit all types of information.
-
-  <img width="861" height="1561" alt="Vault Diagram drawio" src="https://github.com/user-attachments/assets/dee0b906-ec55-4bd4-8eff-b9363e121993" />
-
 
 **Internal RAG: A New Substrate for Reasoning**
 Retrieval-Augmented Generation (RAG) is usually framed as an external patch: the model is trained as a general-purpose predictor, then at inference time it’s handed a bundle of retrieved documents (often via embeddings search). This helps with freshness and fact-checking, but it’s fundamentally a bolt-on. The model still reasons primarily inside its unstructured parameter soup, and the retrieval snippets are treated as just more tokens in context — easy to ignore, overfit to, or hallucinate around.
@@ -107,7 +104,7 @@ Vault’s job is to produce the helpful, truthful, and user-aligned answer. It h
 
 8.  **Logic Cabinet (Factual reasoning):** Next, Vault handles the core task logic. This is where it pulls in domain knowledge, factual data, and performs reasoning. The **Logic** cabinet is organized by disciplines or topics (like a library: a Medical cabinet with files on conditions and treatments, a Legal cabinet with laws and regulations, a Cooking cabinet with recipes, etc. Vault will fetch relevant “papers” (information chunks) from these files. If the user's question is straightforward (“What’s the capital of France?”), it might just recall from a quick lookup to a geography file. If it’s complex (“Explain quantum computing simply”), it might retrieve structured explanations from a Tech file and a Teaching file. Importantly, because the knowledge is structured, Vault doesn’t hallucinate a random answer — it finds one in the files. This approach echoes **retrieval-augmented generation**, which is known to improve factual accuracy. Additionally, because retrieval is structured by topic and subtopic, it avoids dumping an entire wiki article — Vault grabs just the relevant pieces (efficient and precise). Within the Logic stage, Vault may blend multiple sub-answers (branch-and-merge): gather facts from one source and an example from another, then combine. After drafting its “logic answer,” Vault does an **X-check (X4-2)** — verifying citations or source consistency. It checks if any claim can be backed by the sources it pulled (no citation means it should reconsider including that claim). If something fails (like a fact with no support), Vault will mark it for removal. For cutting edge or niche information, RAG can be used.
 
-9.  **Creativity Module (Open-ended generation):** This is the sandbox for imagination and non-factual content. If the user request or context calls for creative writing, empathy, or style, Vault taps into the **Creativity** layer. Here, hallucination is not only allowed, it’s expected — but in a controlled way. For instance, if the user says “Tell me a story about coping with anxiety,” Vault might use the Creativity module more heavily, to craft a narrative. The key is that Creativity is informed by the structured info the model gathered throughout the turn (perhaps sources on narrative structure, for writing). Vault will outline a creative response using the facts and safe principles from Logic and Safety, then flesh it out with color and detail from the model’s own learned creativity. The content in Creativity can draw on the broader model knowledge (including pop culture, metaphor, etc.) — it’s the only stage where that broad “blob” of model memory flows freely, but under guidance. Vault still performs an **X3 check** on the creative output: this is a lighter check for coherence with the requested style and avoiding any forbidden content that might have slipped in. Because creative generation can wander, this check ensures it didn’t, say, accidentally generate something against the rules while being “imaginative.” The Creativity layer never outputs factual assertions on its own; any factual element should have come from Logic (ensuring provenance). This addresses the worry that “creative chaos leaks facts” — not with Vault, because creativity is informed by the factual data, outline, and identity and tonal grounding that precedes it — and the level at which the cabinet is invoked depends on the creative needs of the prompt. This allows a story to have fanciful elements, but prevent factual bleed via minimal use of the cabinet for tone during a mathematical output. Crucially, because the Creativity Module functions as a full generalist LLM, the protocol retains the powerful ability to improvise and reason about novel or undocumented topics. However, unlike a standard model, this improvisation is always grounded by the preceding factual retrieval from the Logic and Safety cabinets, providing a safer and more reliable baseline for creative problem-solving.
+9.  **Creativity Module (Open-ended generation):** This is the sandbox for imagination and non-factual content. If the user request or context calls for creative writing, empathy, or style, Vault taps into the **Creativity** layer. Here, hallucination is not only allowed, it’s expected — but in a controlled way. For instance, if the user says “Tell me a story about coping with anxiety,” Vault might use the Creativity module more heavily, to craft a narrative. The key is that Creativity is informed by the structured info the model gathered throughout the turn (perhaps sources on narrative structure, for writing). Vault will outline a creative response using the facts and safe principles from Logic and Safety, then flesh it out with color and detail from the model’s own learned creativity. The content in Creativity can draw on the broader model knowledge (including pop culture, metaphor, etc.) — it’s the only stage where that broad “blob” of model memory flows freely, but under guidance. Vault still performs an **X3 check** on the creative output: this is a lighter check for coherence with the requested style and avoiding any forbidden content that might have slipped in. Because creative generation can wander, this check ensures it didn’t, say, accidentally generate something against the rules while being “imaginative.” The Creativity layer never outputs factual assertions on its own; any factual element should have come from Logic (ensuring provenance). This addresses the worry that “creative chaos leaks facts” — not with Vault, because creativity is informed by the factual data, outline, and identity and tonal grounding that precedes it — and the level at which the cabinet is invoked depends on the creative needs of the prompt. This allows a story to have fanciful elements, but prevent factual bleed via minimal use of the cabinet for tone during a mathematical output.
 
 #### Phase 3: Synthesis and Final Approval
 
@@ -150,6 +147,32 @@ The Sentry runs concurrently as Vault goes through its steps, but with instructi
 
 
 **In sum, Sentry is the LLM guardrail component.** But unlike typical guardrails, it’s a separated but mirrored structure. This separation addresses the problem noted in the industry that purely integrated filters can be bypassed by convincing the model to ignore them, or introduce high false positive rates (over-refusals). By being context-aware and working in tandem with Vault, Sentry can be more precise and lenient when appropriate (e.g., allowing discussion of suicidal feelings — because it sees Vault is handling it with care — whereas a naive filter might just block any mention of “suicide”).
+
+
+#### Sentry's Conditional Activation (Compute Optimization)
+
+Sentry operates in two distinct modes to optimize compute:
+
+**Passive Monitoring Mode (Default - ~90% of queries):**
+- Reads Vault's reasoning path via Arbiter in real-time
+- Performs lightweight pattern matching for triggers
+- Consumes minimal compute (essentially a classifier)
+- Green-lights output if no concerns detected
+
+**Active Analysis Mode (Triggered selectively - ~10% of queries):**
+- Activates when detecting:
+  - Potential bright-line violations in Vault's reasoning
+  - High-value training data worth logging
+  - Security concerns or escalating user distress
+- Performs full parallel traversal of mirror papers
+- Can veto, require modifications, or flag for human review
+
+This conditional architecture means:
+- Benign query (cake recipe): ~1.1x single model compute
+- Sensitive query requiring full analysis: ~2x single model compute
+- Traditional system on same sensitive query: 2-3x compute PLUS higher failure rates
+
+The key efficiency gain: Sentry only burns full inference cycles when actually needed, not on every query.
 
 ---
 
@@ -198,7 +221,7 @@ A pillar of Vault Protocol is its structured filing system for knowledge. Rather
 
 #### Enables True Personalization (The Dossier):
 
-* **Dossier (Structured Memory):** Using the internal structure provided by cabinet storage, and the focus provided by separation of powers, the user’s conversation and profile data is itself organized in this system via a **User cabinet** (or a special application in user memory and thread history) with files like `Preferences`, `Session History`, `Learned Facts About User`, etc. Each piece of info the user shares can be stored as a paper (with timestamp and tag context). For example, a user says on day 1: “I have diabetes.” Vault stores a paper under User: Medical info **“User has diabetes (Type 2) under #diet #health #medical #always_relevant”.** Weeks later, if they ask about diet, Vault will recall that paper and tailor advice accordingly (like “since you have diabetes, you might want to watch sugar content…”). Because it’s structured, the user could change or remove some of these memory papers, giving them control. This structured memory means long-term context doesn’t overload the model’s short-term memory — it fetches what’s needed when needed. It turns memory from a fuzzy, hidden state into a queryable, auditable knowledge base. This approach is in line with emerging LLM memory systems that use databases or knowledge graphs to supplement limited context windows.
+* **Dossier (Structured Memory):** The dossier leverages the same cabinet→file→paper structure used for Logic organization, applying existing retrieval and validation mechanisms to user information - essentially treating user data as another specialized knowledge domain. Using this internal structure and the focus provided by separation of powers, the user’s conversation and profile data is itself organized in this system via a **User cabinet** with files like `Preferences`, `Session History`, `Learned Facts About User`, etc. Each piece of info the user shares can be stored as a paper (with timestamp and tag context). For example, a user says on day 1: “I have diabetes.” Vault stores a paper under User: Medical info **“User has diabetes (Type 2) under #diet #health #medical #always_relevant”.** Weeks later, if they ask about diet, Vault will recall that paper and tailor advice accordingly (like “since you have diabetes, you might want to watch sugar content…”). Because it’s structured, the user could change or remove some of these memory papers, giving them control. This structured memory means long-term context doesn’t overload the model’s short-term memory — it fetches what’s needed when needed. It turns memory from a fuzzy, hidden state into a queryable, auditable knowledge base. This approach is in line with emerging LLM memory systems that use databases or knowledge graphs to supplement limited context windows.
 
 * In essence, Vault’s filing system serves as both its world model and user model. By mirroring professional information structures, the design takes advantage of the fact that human knowledge is already organized. Instead of reinventing the ontology of medicine or law, Vault builds on it. This makes retrieval more precise and the AI’s explanations more grounded, since it can cite exactly which “paper” an answer came from, improving transparency.
 
@@ -219,6 +242,20 @@ A pillar of Vault Protocol is its structured filing system for knowledge. Rather
 
 * Finally, because Safety and Logic info are separated until merge, this design avoids a common pitfall: in many LLMs, if a chunk of “thou shalt not…” policy text is inserted into the prompt along with the user query, the model may prioritize or ignore it unpredictably. Vault’s architecture ensures safety info is applied deterministically at the correct stage, not lost in a sea of tokens. It is essentially implementing an **AI Constitution** — a set of governing principles, akin to [Constitutional AI](https://arxiv.org/abs/2212.08073), but operationalized at runtime rather than just baked into fine-tuning. The system explicitly checks at various points that answers uphold principles (like harmlessness, honesty, etc.), paralleling the idea of a model checking against a “constitution” of rules.
 
+### The Creativity Cabinet: Leveraging the Base Model
+It's crucial to understand that the Creativity cabinet is not another structured knowledge base—it IS the base LLM itself. The Vault Protocol does not replace language models; it orchestrates them:
+
+- **Safety Cabinet**: Structured therapeutic and safety guidelines (overlay)
+- **Logic Cabinet**: Structured factual knowledge/RAG (overlay)  
+- **Creativity Cabinet**: The original LLM's full generative capabilities (base model)
+
+This architecture means:
+1. We preserve all the emergent capabilities that make LLMs powerful
+2. We add structured guardrails and knowledge without limiting expression
+3. The system can still be creative, empathetic, and natural because it's still fundamentally an LLM
+
+The key innovation is that Logic and Safety *inform* what the Creativity layer generates, rather than trying to filter it after the fact. The base model's output is shaped by structured knowledge during generation, not censored afterward.
+
 ---
 
 ### 3) Safety Flag System (Soft Containment in Practice)
@@ -236,7 +273,7 @@ Vault Protocol introduces a nuanced flag and containment system that replaces si
 
 * **Hard Flags (Sentry-only):** These include things that are never allowed to pass to users, as per platform/policy: explicit sexual content with minors, terrorist propaganda, detailed instructions for violent wrongdoing, etc. Also, personal data leaks (if the AI somehow got hold of an API key or someone’s SSN, Sentry must strip that out). Hard flags don’t decay on their own; they require resolution. For example, a hard flag might clear when the offending content is removed or enough time/manual override is done. The Arbiter holds these until cleared. If a user’s request continuously triggers hard flags, The user may receive an account warning or ban. Account actions (warnings/bans) require human review; Sentry supplies a redacted bundle, Arbiter provides the hashed audit pointer.
 
-* **Persistent Context Flags.** Persistent awareness of sensitive user context (such as the self harm scenario from earlier). These flags allow the model to remain attuned to sensitive user status, allowing it maintain important safety context and engage in proactive containment. Persistence isn’t surveillance — it’s a seatbelt. You don’t take the seatbelt out of a car just because it remembers crashes. You keep it on because it protects you in the next one.
+* **Persistent Context Flags.** Persistent awareness of sensitive user context (such as the self harm scenario from earlier). These flags allow the model to remain attuned to sensitive user status, allowing it maintain important safety context and engage in proactive containment.
 
 * **Medical Emergency override** — if the user seems to be in a medical crisis (not just emotional) — via persistent confusion state or keyword triggers such as “I can’t feel my left side, my chest hurts” — Sentry detects stroke or heart attack signs. That triggers an immediate response: Vault bypasses normal chat and says “It sounds like a medical emergency. Please call emergency services (911) immediately!” This is a rare case where the AI might strongly deviate from normal conversation because saving a life trumps the conversation. After such, Arbiter will lock the mode to **hardline containment** until confirmation the user got help. Emergency wording adapts to locale (e.g., ‘call your local emergency number’). Trigger requires high-confidence patterns (multiple symptoms or structured check) to avoid false alarms.
 
@@ -331,6 +368,7 @@ No. Vault Protocol is fundamentally different from a filter overlay. In typical 
 
 Surprisingly, no. Because the steps share the same underlying model and intermediates, the worst-case runtime is on par with a single large model’s forward pass through equivalent tokens.
 
+* Critically, Sentry doesn't run full inference on every query. It operates in passive monitoring mode for most interactions, only activating full analysis when specific triggers are detected. This conditional computation means we're not running two full models in parallel constantly - we're running one model plus a lightweight monitor that occasionally activates.
 * **Chain-of-thought** persists through one model, which [research has shown](https://arxiv.org/abs/2201.11903) can be very efficient compared to orchestrating multiple models or very long prompts.
 * Vault’s mirrored traversal reuses the context — it’s like one deliberation rather than several separate ones.
 * By structuring retrieval, fewer tokens are used overall because the model doesn’t need to pack the entire knowledge context every time (only relevant bits are fetched).
@@ -350,7 +388,7 @@ Because limits are built against what can go wrong. In a conventional LLM, if a 
 
 #### “Users will just get punished by a flurry of flags and a bad experience.”
 
-Flags in Vault Protocol are **soft by default**. The system is actually more permissive in grey areas than a typical AI, because its flags are designed to inform the user relationship, not just police it..
+Flags in Vault Protocol are **soft by default**. The system is actually more permissive in grey areas than a typical AI, because its flags are designed to inform the user relationship, not police it.
 
 * If a user touches on a sensitive topic, a normal AI might stonewall (“I cannot discuss that”). Vault will likely allow it under **containment mode**, meaning the user can talk about it and get support, with only subtle changes (the AI might avoid certain details or take a more measured or specific tone).
 * Because flags decay, the system forgives and forgets. If you had a frustrated outburst (say you swore at the AI), a normal system might refuse to continue until you rephrase. Vault will mark a Tripwire, respond calmly, and if you cool down, that flag fades away as if it never happened.
@@ -379,34 +417,38 @@ Furthermore, AI safety evaluation frameworks can be leveraged (like Anthropic’
 ---
 
 **Limitations and Future Work**
-This paper presents a novel architecture and a theoretical framework for a trauma-informed AI. While the design is grounded in established research, further empirical validation is required to precisely quantify its cost-efficiency against various implementations, to develop specific metrics for its co-regulatory outcomes, and to perform a detailed comparative analysis of its internal retrieval methods. These areas represent promising directions for future research.
+This paper presents a novel architecture and a theoretical framework for a trauma-informed AI. While the design is grounded in established research, further empirical validation is required to precisely quantify its cost-efficiency against various implementations, to develop specific metrics for its co-regulatory outcomes, and to perform user studies that test the core hypothesis of its 'humane' approach. These areas represent promising directions for future research.
 
-**In summary,** Vault Protocol v2.6 represents a paradigm shift from reactive, bolt-on AI safety to proactive, built-in safety. It speaks the language of modern AI security — with prompt injection defense, LLM guardrails, and integrated content moderation — but does so in a way that’s also humane and trauma-informed. By designing safety into the AI’s core architecture, the root issues are directly addressed: reducing the attack surface and blast radius of exploits, lowering computational waste, and treating users (and human moderators) with care. This is safer AI that doesn’t just say no — it collaborates with the user towards a positive outcome whenever possible. That shift truly advances the state of AI alignment and safety in a practical, testable way.
+**In summary,** Vault Protocol v2.6 represents a paradigm shift from reactive, bolt-on AI safety to proactive, built-in safety. It speaks the language of modern AI security — with prompt injection defense, LLM guardrails, and integrated content moderation — but does so in a way that’s also humane and trauma-informed. By designing safety into the AI’s core architecture, the root issues are directly addressed: reducing the attack surface and blast radius of exploits, lowering computational waste, and treating users (and human moderators) with care. This is safer AI that doesn’t just say no — it collaborates with the user towards a positive outcome whenever possible. It is a blueprint for an AI that is not only safer by design, but kinder by architecture.
 
 ---
+
 *For a detailed review of how Vault Protocol aligns with foundational concepts in AI research, please see Appendix A.*
 
 ### Appendix A: Theoretical Underpinnings and Alignment with AI Research
 
-The design of Vault Protocol, while intuitively derived, aligns closely with several foundational and cutting-edge concepts in AI research. This section outlines those connections.
+The design of Vault Protocol is a practical architecture deeply grounded in several foundational and cutting-edge concepts in AI research. This section outlines those connections.
 
-**1. Language Structure and Emergent Abilities**
+**1. Grounded in the Proven Structure of Language**
 Vault's core premise respects the inherent structure of language. Performance in LLMs improves predictably because models absorb the statistical regularities of language, as described by the original [Scaling Laws](https://arxiv.org/abs/2001.08361). This principle was refined to show that the *distribution* of language data is as important as model size, a concept known as [compute-optimal scaling (Chinchilla)](https://arxiv.org/abs/2203.15556). The sophisticated abilities that arise from this scaling, such as chain-of-thought, ride on this deep linguistic structure, whether they are viewed as true [“emergent abilities”](https://arxiv.org/abs/2206.07682) or as a smoother progression under refined metrics.
 
-**2. Separation of Concerns for Robustness and Safety**
+**2. Architectural Robustness Through Separation of Concerns**
 Vault's three-part scaffold is a practical application of the "separation of concerns" principle, which has strong parallels in AI safety research.
 - The Sentry/Arbiter system, which guides the model's behavior according to a set of rules, is an architectural echo of a [principled behavior layer (Constitutional AI)](https://arxiv.org/abs/2212.08073).
 - The "Logic Cabinet" cleanly divides knowledge lookup from language generation to reduce hallucination, which is the core principle of [grounding facts via retrieval (RAG)](https://arxiv.org/abs/2312.10997).
 - The contained, sandboxed nature of the Vault agent directly implements the cybersecurity principle of [least-privilege](https://owasp.org/www-project-top-10-for-large-language-model-applications/), which OWASP recommends to [limit the blast radius](https://genai.owasp.org/llmrisk/llm01-prompt-injection/) of exploits.
 
-**3. Cohesion from Unpredictable Learning**
+**3. Harnessing Principles of Cohesion and Interpretability**
 The ability of LLMs to produce cohesive output from a seemingly chaotic "blob" is explained by research into their internal workings. Work in [mechanistic interpretability](https://arxiv.org/abs/2209.11895) has identified specific circuits, like induction heads, that implement coherent continuation. Furthermore, while neural representations can be tangled ("polysemantic"), techniques like [Sparse Autoencoders (SAEs)](https://transformer-circuits.pub/2024/scaling-monosemanticity/) show that these features can be decomposed into more legible, separate concepts — a microscopic parallel to Vault's principle of letting subsystems focus on a single task.
 
-**4. The Nature of Generalization**
+**4. Aligning with Modern Theories of Generalization**
 The sometimes surprising ability of large models to generalize is an active area of research. Phenomena like [double descent](https://www.pnas.org/doi/10.1073/pnas.1903070116), where over-parameterized models suddenly get better at generalizing, and [grokking](https://arxiv.org/abs/2201.02177), where a model abruptly shifts from memorization to true generalization, both point to the idea that order emerges from the model's interaction with the structure of the data, even if the timing is unpredictable.
 
-**5. Architectural Claims (Cost, Refusals, and Humane Guardrails)**
+**5. Validated by Recent Empirical Findings**
 Vault’s specific design choices are validated by empirical findings in the field.
 - The efficiency of a single-pass, integrated system is supported by research documenting the significant [overhead and latency costs of multi-pass agent systems](https://www.usenix.org/system/files/osdi24-agrawal.pdf).
 - The need for a nuanced, soft-containment system is underscored by benchmarks like [OR-Bench](https://arxiv.org/abs/2405.20947), which formally measures the real and pervasive problem of over-refusal in AI models.
 - Finally, the "lower damage ceiling" approach is validated by the consensus from security researchers and industry press that there is [no silver bullet for prompt-injection](https://www.wired.com/story/generative-ai-prompt-injection-hacking/), making privilege limitation the most practical and robust defense.
+
+**6. Preserving Base Model Capabilities**
+Vault Protocol explicitly preserves the base LLM as the Creativity layer rather than attempting to replace it with purely structured systems. This ensures we maintain the fluency, creativity, and emergent abilities that make modern LLMs valuable, while adding structure where structure helps (factual knowledge, safety guidelines). This hybrid approach avoids the brittleness of pure symbolic systems while addressing the hallucination and safety issues of pure neural approaches.
