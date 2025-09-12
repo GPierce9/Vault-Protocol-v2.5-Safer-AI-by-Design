@@ -226,6 +226,8 @@ This is the difference between:
 Current LLMs: "Based on patterns in my training, the dosage is probably 5mg"
 Vault Protocol: "Retrieved from Medical/Cardiology/Medication: Lisinopril starting dose = 5mg"
 
+This hybrid approach, which preserves the fluency of a neural network while enforcing the reliability of a structured system, is a practical application of the principles emerging from the field of Neuro-Symbolic AI. Foundational work from top labs has demonstrated the power of combining neural and logical systems, whether through creating networks that perform logical reasoning, up to [first-order theorem proving](https://arxiv.org/abs/2006.13155), [composing modular neural components to solve complex tasks](https://arxiv.org/abs/1511.02799), or [building systems that learn and utilize symbolic programs](https://arxiv.org/abs/2006.08381). The Vault Protocol builds on these core principles to create a complete, safety-oriented architecture.
+
 #### Why This Eliminates Core Problems
 Hallucination: Impossible for structured facts—they're retrieved, not generated.
 Safety Drift: Safety rules are hard-coded procedures, not learned behaviors that can be overridden.
@@ -472,5 +474,8 @@ Vault’s specific design choices are validated by empirical findings in the fie
 - The need for a nuanced, soft-containment system is underscored by benchmarks like [OR-Bench](https://arxiv.org/abs/2405.20947), which formally measures the real and pervasive problem of over-refusal in AI models.
 - Finally, the "lower damage ceiling" approach is validated by the consensus from security researchers and industry press that there is [no silver bullet for prompt-injection](https://www.wired.com/story/generative-ai-prompt-injection-hacking/), making privilege limitation the most practical and robust defense.
 
-**6. Preserving Base Model Capabilities**
-Vault Protocol explicitly preserves the base LLM as the Creativity layer rather than attempting to replace it with purely structured systems. This ensures we maintain the fluency, creativity, and emergent abilities that make modern LLMs valuable, while adding structure where structure helps (factual knowledge, safety guidelines). This hybrid approach avoids the brittleness of pure symbolic systems while addressing the hallucination and safety issues of pure neural approaches.
+**6. The Hybrid Solution: A Neuro-Symbolic Architecture**
+
+Ultimately, the Vault Protocol is a blueprint for a hybrid, **Neuro-Symbolic architecture**. It does not seek to replace the powerful, creative capabilities of the base LLM, but to ground them in a structured, logical framework. This approach directly aligns with advanced AI research, which has moved beyond the false dichotomy of pure neural vs. pure symbolic systems.
+
+The goal is to create systems that can reason with the formal precision of a logical engine, as demonstrated in [pioneering work on Logical Neural Networks (Riegel et al., 2020)](https://arxiv.org/abs/2006.13155), while maintaining the fluency of a language model. This is achieved by designing [modular architectures that can compose specialized skills (Andreas et al., 2015)](https://arxiv.org/abs/1511.02799) and by building systems that can [learn and utilize structured, symbolic knowledge (Ellis et al., 2020)](https://arxiv.org/abs/2006.08381). By separating perception from symbolic reasoning, as in the [Neuro-Symbolic Concept Learner (Mao et al., 2019)](https://arxiv.org/abs/1904.12584), the Vault Protocol avoids the brittleness of older systems while addressing the hallucination and reliability issues of modern LLMs. It is a practical roadmap for an AI that is not just more powerful, but also more auditable and amenable to verification, improving reliability and trustworthiness.
