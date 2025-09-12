@@ -226,7 +226,7 @@ This is the difference between:
 Current LLMs: "Based on patterns in my training, the dosage is probably 5mg"
 Vault Protocol: "Retrieved from Medical/Cardiology/Medication: Lisinopril starting dose = 5mg"
 
-Why This Eliminates Core Problems
+#### Why This Eliminates Core Problems
 Hallucination: Impossible for structured facts—they're retrieved, not generated.
 Safety Drift: Safety rules are hard-coded procedures, not learned behaviors that can be overridden.
 Inconsistency: The same query to the same cabinet always returns the same information.
