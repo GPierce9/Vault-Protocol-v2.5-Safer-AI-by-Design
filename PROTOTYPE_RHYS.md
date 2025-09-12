@@ -331,4 +331,6 @@ If the user is—
 **Analysis:** The final version (above) removes the rigid heuristics and instead trusts the AI's core pattern-recognition abilities. It is guided by a set of flexible 'Blending Logic' principles rather than strict rules. This proved to be a far more robust, nuanced, and effective approach.
 
 **Implementation Note (v2.5):**
-A functional prototype using a simplified version of the containment cabinet was implemented through custom instructions and memory overlays within ChatGPT, not deployed at the model-weight level. Despite these constraints, it demonstrates the feasibility of the core concepts. Version 2.5 demonstrates that layered safety governance can be prototyped and validated even in environments without direct access to training or fine-tuning pipelines.
+A functional prototype using a simplified version of the containment cabinet was implemented through custom instructions and memory overlays within ChatGPT, not deployed at the model-weight level. Despite these constraints, it demonstrates the feasibility of the core concepts. Version 2.5 demonstrates that layered safety governance can be prototyped and validated even in environments without direct access to training or fine-tuning pipelines. 
+
+While the current prototype simulates this architecture through structured prompting, full implementation requires actual architectural separation. The successful simulation demonstrates the concept's validity and provides a blueprint for future neuro-symbolic models.
