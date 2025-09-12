@@ -210,6 +210,28 @@ A pillar of Vault Protocol is its structured filing system for knowledge. Rather
 * **Papers:** Each file contains discrete **“papers”** — these are like individual facts, guidelines, or pieces of information. A paper is a Professional source or procedure that can be used as a source for answers.
 
 
+### 2.5) The Neuro-Symbolic Foundation: Why Structure Matters
+
+#### Beyond Probabilistic Approximation
+The filing system described above is not merely organizational convenience—it represents a fundamental architectural requirement. Current LLMs store all knowledge in neural weights, making every output probabilistic. This is why they hallucinate: they're approximating facts rather than retrieving them.
+Vault Protocol envisions a hybrid neuro-symbolic architecture where:
+
+Symbolic Engine (Logic/Safety Cabinets): Stores structured knowledge deterministically. Mathematical axioms, medical facts, legal codes, and safety protocols exist as discrete, retrievable "papers" with 100% fidelity.
+Neural Network (Creativity Cabinet): Handles natural language generation, tone, and creative expression—tasks where probabilistic processing excels.
+
+#### Deterministic Retrieval vs. Probabilistic Generation
+When Vault needs a medical fact, it doesn't generate an approximation—it retrieves the exact information from the Logic Cabinet. When it needs to apply a safety protocol, it doesn't estimate what might be appropriate—it executes predetermined procedures from the Safety Cabinet.
+This is the difference between:
+
+Current LLMs: "Based on patterns in my training, the dosage is probably 5mg"
+Vault Protocol: "Retrieved from Medical/Cardiology/Medication: Lisinopril starting dose = 5mg"
+
+Why This Eliminates Core Problems
+Hallucination: Impossible for structured facts—they're retrieved, not generated.
+Safety Drift: Safety rules are hard-coded procedures, not learned behaviors that can be overridden.
+Inconsistency: The same query to the same cabinet always returns the same information.
+
+
 ### Key Advantages of the Filing System.
 
 #### Mitigates Hallucination & Improves Relevance:
